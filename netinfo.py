@@ -90,15 +90,17 @@ for interface in psutil.net_io_counters(pernic=True).keys():
 # Calculate current throughput rates for each interface
 rates = {}
 for interface in initial_io_counters:
-    recv_bytes = (
+    recv_bytes = int(
         final_io_counters[interface].bytes_recv
         - initial_io_counters[interface].bytes_recv
     )
-    sent_bytes = (
+    sent_bytes = int(
         final_io_counters[interface].bytes_sent
         - initial_io_counters[interface].bytes_sent
     )
-    rates[interface] = (recv_bytes / 1024, sent_bytes / 1024)
+    # rates[interface] = ( (recv_bytes * 8 ) / 1024**2, (sent_bytes * 8) / 1024**2 ) #Mbps
+    rates[interface] = ((recv_bytes * 8) / 1024**1, (sent_bytes * 8) / 1024**1)  # Kbps
+
 
 # Print final interface information with throughput rates
 for interface_name in interface_info:
@@ -112,7 +114,9 @@ for interface_name in interface_info:
         if interface_name.rstrip("*") in rates
         else 0
     )
+    rx_rate = int(rx_rate)
+    tx_rate = int(tx_rate)
     print(
-        f"Interface: {interface_name:<10} IP: {interface_info[interface_name]['ip_netmask']:<15}  RX/TX Rate KB/s: {rx_rate:>8.0f} | {tx_rate:.0f} "
+        f"Interface: {interface_name:<10} IP: {interface_info[interface_name]['ip_netmask']:<15}  RX/TX Rate Kbps: {rx_rate:8,} | {tx_rate:<8,} "
     )
 sys.exit(0)  # Return 0 to the operating system upon exit
